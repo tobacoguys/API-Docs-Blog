@@ -201,8 +201,7 @@ paths:
       tags:
         - posts
       summary: Update a blog post
-      description: ''
-      operationId: Updates the information of a blog post based on the provided post ID
+      description: Updates the information of a blog post based on the provided post ID.
       parameters:
         - name: postID
           in: path
@@ -248,33 +247,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/updatePost'
                 
+  /posts/deletePost/{postID}:              
     delete:
       tags:
-        - pet
-      summary: Deletes a pet
-      description: delete a pet
-      operationId: deletePet
+        - posts
+      summary: Delete a blog post
+      description: Delete a blog post based on the provided post ID.
       parameters:
-        - name: api_key
-          in: header
-          description: ''
-          required: false
-          schema:
-            type: string
-        - name: petId
+        - name: postID
           in: path
-          description: Pet id to delete
+          description: The ID of the post to update
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            example: "641ec5b5e3c4b2a456aa01f9"
       responses:
+        '200':
+          description: Post deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Post deleted successfully."
         '400':
-          description: Invalid pet value
-      security:
-        - petstore_auth:
-            - write:pets
-            - read:pets
+          description: Invalid post ID
   /pet/{petId}/uploadImage:
     post:
       tags:
