@@ -278,25 +278,6 @@ paths:
         '400':
           description: Invalid post ID
 
-  /store/inventory:
-    get:
-      tags:
-        - store
-      summary: Returns pet inventories by status
-      description: Returns a map of status codes to quantities
-      operationId: getInventory
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties:
-                  type: integer
-                  format: int32
-      security:
-        - api_key: []
   /category/create:
     post:
       tags:
@@ -388,32 +369,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-  /user/createWithList:
-    post:
+  /comment/{commentID}:
+    get:
       tags:
-        - user
-      summary: Creates list of users with given input array
-      description: Creates list of users with given input array
-      operationId: createUsersWithListInput
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/UsersSignUp'
+        - comment
+      summary: Get a comment by ID
+      description: Retrieves detailed information about a comment based on its ID, including any replies to the comment.
+      parameters:
+        - name: commentID
+          in: path
+          description: The ID of the comment to retrieve
+          required: true
+          schema:
+            type: string
+            example: "6482e5b5e3c4a2a456cd03f9"
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsersSignUp'          
-            application/xml:
+                $ref: '#/components/schemas/GetComment'          
+        '400':
+          description: Invalid comment ID
+  /comment/reply/{commentID}:
+    post:
+      tags:
+        - comment
+      summary: Reply to a comment
+      description: Allows a user to reply to a specific comment. The reply will be attached to the root comment.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: commentID
+          in: path
+          description: The ID of the root comment to reply to
+          required: true
+          schema:
+            type: string
+            example: "6482e5b5e3c4a2a456cd03f9"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: The content of the reply
+                  example: "This is a reply to the comment."
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
               schema:
-                $ref: '#/components/schemas/UsersSignUp'
-        default:
-          description: successful operation
+                $ref: '#/components/schemas/ReplyComment'          
+        '400':
+          description: Invalid input or missing fields
+  /comment/update/{commentID}:
+    put:
+      tags:
+      - comment
+      summary: Update a comment
+      description: Allows a user to update the content of a comment they have created.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: commentID
+          in: path
+          description: The ID of the comment to update
+          required: true
+          schema:
+            type: string
+            example: "6482e5b5e3c4a2a456cd03f9"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: The new content of the comment
+                  example: "Updated comment content."
+      responses:
+        '200':
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateComment'
+        '400':
+          description: Invalid input or missing fields
+
   /user/login:
     get:
       tags:
@@ -727,7 +778,81 @@ components:
         updatedAt:
           type: string
           format: date-time
-          example: "2024-09-18T10:00:00Z"                      
+          example: "2024-09-18T10:00:00Z" 
+    GetComment:
+      type: object
+      properties:
+        status:
+          type: boolean
+          example: true
+        id:
+          type: string
+          example: "6482e5b5e3c4a2a456cd03f9"
+        user:
+          type: string
+          description: The user who made the comment
+          example: "Dung"
+        postID:
+          type: string
+          description: The ID of the post being commented on
+          example: "641ec5b5e3c4b2a456aa01f9"
+        content:
+          type: string
+          description: The content of the comment
+          example: "This is a very insightful post!"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-09-18T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-09-18T10:00:00Z"      
+    ReplyComment:
+      type: object
+      properties:
+        status:
+          type: boolean
+          example: true
+        id:
+          type: string
+          example: "6492e5b5e3c4a2a456cd03f9"
+        user:
+          type: string
+          description: ID of the user who created the reply
+          example: "JohnDoe"
+        content:
+          type: string
+          description: The content of the reply
+          example: "This is a reply to the comment."
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-09-18T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-09-18T11:00:00Z"
+    UpdateComment: 
+      type: object
+      properties:
+        status:
+          type: boolean
+          example: true
+        comment:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "6492e5b5e3c4a2a456cd03f9"
+            content:
+              type: string
+              description: The new content of the comment
+              example: "Updated comment content."
+            updatedAt:
+              type: string
+              format: date-time
+              example: "2024-09-18T11:00:00Z"
     Category:
       type: object
       properties:
